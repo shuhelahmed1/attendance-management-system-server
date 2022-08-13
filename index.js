@@ -29,23 +29,43 @@ async function run() {
       await client.connect();
       console.log('database connected')
       const database = client.db("attendance-managemnet-system");
-      const usersCollection = database.collection("users");
+      const studentsCollection = database.collection("students");
+      const teachersCollection = database.collection("teachers");
   
                                 // USERS API'S
   
-      // post api for users
-      app.post('/users', async(req,res)=>{
-        const user = req.body;
-        const result = await usersCollection.insertOne(user)
-        res.json(result)
+      // post api for students
+      app.post('/students', async(req,res)=>{
+        const student = req.body;
+        const result = await studentsCollection.insertOne(student)
+        res.json(student)
       })
 
-      // get api for users
-    app.get('/users',async(req,res)=>{
-        const cursor = usersCollection.find({});
-        const orders = await cursor.toArray();
-        res.send(orders)
+      // get api for students
+    app.get('/students',async(req,res)=>{
+        const cursor = studentsCollection.find({});
+        const students = await cursor.toArray();
+        res.send(students)
       })
+
+      // post api for teacher
+      app.post('/teachers', async(req,res)=>{
+        const teacher = req.body;
+        const result = await teachersCollection.insertOne(teacher)
+        res.json(teacher)
+      })
+
+      // get api for teacher by email
+    app.get('/teachers/:email', async(req,res)=>{
+      const email = req.params.email;
+      const query = {email: email};
+      const teacher = await teachersCollection.findOne(query);
+      let isTeacher = false;
+      if(teacher?.profession === 'teacher'){
+        isTeacher=true;
+      }
+      res.json({teacher: isTeacher})
+    })
 
   
       // get api for specific user
