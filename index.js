@@ -67,7 +67,7 @@ async function run() {
       if(teacher?.profession === 'teacher'){
         isTeacher=true;
       }
-      res.send({teacher: isTeacher})
+      res.json({teacher: isTeacher})
     })
 
      // put api for specific student
