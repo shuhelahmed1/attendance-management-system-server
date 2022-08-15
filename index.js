@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 const corsConfig = {
@@ -19,7 +20,7 @@ const corsConfig = {
     next()
   })
 
-const uri = "mongodb+srv://attendance-managemnet-system:P7xp8wzsJhfSHAlo@cluster0.oesrn.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.oesrn.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -37,6 +38,7 @@ async function run() {
       // post api for students
       app.post('/students', async(req,res)=>{
         const student = req.body;
+        student.createdAt = new Date();
         const result = await studentsCollection.insertOne(student)
         res.json(student)
       })
@@ -51,6 +53,7 @@ async function run() {
       // post api for teacher
       app.post('/teachers', async(req,res)=>{
         const teacher = req.body;
+        teacher.createdAt = new Date();
         const result = await teachersCollection.insertOne(teacher)
         res.json(teacher)
       })
@@ -67,18 +70,21 @@ async function run() {
       res.json({teacher: isTeacher})
     })
 
-  
-      // get api for specific user
-    //   app.get('/users/:email', async(req,res)=>{
-    //     const email = req.params.email;
-    //     const query = {email: email};
-    //     const user = await usersCollection.findOne(query);
-    //     let isAdmin = false;
-    //     if(user?.role === 'admin'){
-    //       isAdmin=true;
-    //     }
-    //     res.json({admin: isAdmin})
-    //   })
+     // put api for specific student
+     app.put('/students/:id', async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id: ObjectId(id)}
+      const options = {upsert: true}
+      let attendance = req.body.attendance;
+      if(attendance==='absent') {
+       updateDoc = {$set: {attendance: 'present'}}
+      }
+      else {
+      updateDoc = {$set: {attendance: 'absent'}}
+      }
+      result = await studentsCollection.updateOne(filter, updateDoc, options)
+      res.json(result)
+    })
   
     } finally {
       // await client.close();
@@ -90,10 +96,6 @@ async function run() {
 app.get('/', (req,res)=>{
     res.send('server is running')
 })
-
-
-// pass : Ofpg8aZFFbSPF7C8
-
 
 app.listen(port, ()=>{
     console.log('server is running on port', 5000)
