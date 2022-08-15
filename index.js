@@ -47,7 +47,7 @@ async function run() {
     app.get('/students',async(req,res)=>{
         const cursor = studentsCollection.find({});
         const students = await cursor.toArray();
-        res.send(students)
+        res.json(students)
       })
 
       // post api for teacher
